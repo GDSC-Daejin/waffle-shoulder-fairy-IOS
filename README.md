@@ -1,5 +1,5 @@
 # waffle-shoulder-fairy-IOS
-ios 레포입니다
+어깨요정팀의 'iOS 팀' 레포입니다
 
 ### ****🛠  Development Environment & Simulator****
 
