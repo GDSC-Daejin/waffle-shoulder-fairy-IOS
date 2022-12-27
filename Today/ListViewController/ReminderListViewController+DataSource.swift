@@ -1,4 +1,6 @@
 import UIKit
+import Alamofire
+
 
 extension ReminderListViewController {
     typealias DataSource = UICollectionViewDiffableDataSource<Int, Reminder.ID>
@@ -11,10 +13,11 @@ extension ReminderListViewController {
         NSLocalizedString("Not completed", comment: "Reminder not completed value")
     }
     
-    func updateSnapshot(reloading ids: [Reminder.ID] = []) { // 스냅샷 업데이트 + 미리알람 식별자 배열 수락
+    func updateSnapshot(reloading idsThatChanged: [Reminder.ID] = []) { // 스냅샷 업데이트 + 미리알람 식별자 배열 수락
+        let ids = idsThatChanged.filter { id in filteredReminders.contains(where: { $0.id == id }) }
         var snapshot = Snapshot()
         snapshot.appendSections([0])
-        snapshot.appendItems(reminders.map { $0.id })
+        snapshot.appendItems(filteredReminders.map { $0.id })
         if !ids.isEmpty {   // 배열이 들어있으면 => 스냅샷 식별자 미리알람 로드
             snapshot.reloadItems(ids)
         }
@@ -40,7 +43,7 @@ extension ReminderListViewController {
         cell.backgroundConfiguration = backgroundConfiguration
     }
     
-    func completeReminder(with id: Reminder.ID) {   // 모델에서 미리알람 가져오
+    func completeReminder(with id: Reminder.ID) {   // 모델에서 미리알람 가져오고
         var reminder = reminder(for: id) // 여기서 미리알람 호출함
         reminder.isComplete.toggle()    //속성전환
         update(reminder, with: id)  //미리알람 업뎃
@@ -65,16 +68,26 @@ extension ReminderListViewController {
         button.id = reminder.id //미리알람 속성식별
         button.setImage(image, for: .normal)
         return UICellAccessory.CustomViewConfiguration(customView: button, placement: .leading(displayed: .always))
-    }
-    
-    func reminder(for id: Reminder.ID) -> Reminder {
-        let index = reminders.indexOfReminder(with: id)
-        return reminders[index]
-    }
-    
-    func update(_ reminder: Reminder, with id: Reminder.ID) {
-        let index = reminders.indexOfReminder(with: id)
-        reminders[index] = reminder
-    }
-}
+      
 
+        }
+        
+        func add(_ reminder: Reminder) {
+            reminders.append(reminder)
+        }
+        func deleteReminder(with id: Reminder.ID) {
+            let index = reminders.indexOfReminder(with: id)
+            reminders.remove(at: index)
+        }
+        
+        func reminder(for id: Reminder.ID) -> Reminder {
+            let index = reminders.indexOfReminder(with: id)
+            return reminders[index]
+        }
+        
+        func update(_ reminder: Reminder, with id: Reminder.ID) {
+            let index = reminders.indexOfReminder(with: id)
+            reminders[index] = reminder
+        }
+    }
+    
